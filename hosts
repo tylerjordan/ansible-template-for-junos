@@ -2,85 +2,51 @@
 # means that the lines below are also groups, rather than hostnames.
 # This 'all' group contains all the hosts for both sites.
 [all:children]
-site1
-site2
+site_LNG
+##site_SAN
 
 # 'site1' contains all the devices in that site organised by device type
 # This enables a group variable file not only for this site but also for each
 # of the devices within that site.
-[site1:children]
-site1_mx
-site1_qfabric
-site1_srx
-
-# This is the same as 'site1'
-[site2:children]
-site2_mx
-site2_qfx
-site2_ex
-site2_srx
+[site_LNG:children]
+site_LNG_mdf
+site_LNG_idf
 
 # This group lists hosts. In this example MX's provide connectivity between
 # sites. The group name uses the format of <location>_<platoform> as it makes
 # it clearer what is being applied where in the playbooks
 # Just specify the hostname - not the FQDN
-[site1_mx]
-core1.site1
-core2.site1
+[site_LNG_mdf]
+mdf3A.site_LNG
 
 # This is the same as 'site1_mx'
-[site1_qfabric]
-switch1.site1
+[site_LNG_idf]
+idf1A.site_LNG
+idf1B.site_LNG
+idf2A.site_LNG
+idf3B.site_LNG
 
-# This is the same as 'site1_mx'
-[site1_srx]
-firewall1.site1
-firewall2.site1
-
-# This is the same as 'site1_mx'
-[site2_mx]
-core1.site2
-core2.site2
-
-# This is the same as 'site1_mx'
-[site2_qfx]
-aggregation1.site2
-aggregation2.site2
-
-# This is the same as 'site1_mx'
-[site2_ex]
-leaf1.site2
-leaf2.site2
-leaf3.site2
-leaf4.site2
-
-# This is the same as 'site1_mx'
-[site2_srx]
-firewall1.site2
-firewall2.site2
-
-# Creating this group allows for a platform specific group variable file.
-# With this we can put all platform specific - but site independent - 
-# information in one location.
 # By referencing a group - rather than putting the hostnames - minimises the
 # risk of a host being mised from this group.
-[mx:children]
-site1_mx
-site2_mx
+[mdf:children]
+site_LNG_mdf
+
+[idf:children]
+site_LNG_idf
 
 # This is the same as 'mx'
-[qfabric:children]
-site1_qfabric
+#[qfabric:children]
+#site1_qfabric
 
 # This is the same as 'mx'
-[qfx:children]
-site2_qfx
+#[qfx:children]
+#site2_qfx
 
 # This is the same as 'mx'
-[ex:children]
-site2_ex
+#[ex:children]
+#site2_ex
 
 # This is the same as 'mx'
-[srx:children]
-site1_srx
-site2_srx
+#[srx:children]
+#site1_srx
+#site2_srx

@@ -1,6 +1,129 @@
 build_dir: /var/tmp/build/{{ inventory_hostname }}/tmp
 junos_conf: /var/tmp/build/{{ inventory_hostname }}/junos.conf
 
-global:
-  root_hash: $1$btoLD1Va$aBSDs6xHaZcCmR3PtGg4i/
-  login_message: This is the property of Example Corp. Do not login without express permission.
+# DON't USE dashes "-" in variable names
+
+revision: 1.4
+mgmt_vlan_id: "119"
+system:
+  ntp:
+    - 10.5.248.4
+    - 10.5.248.5
+  time_zone: UTC
+  auth_order:
+    - tacplus
+    - password
+  login:
+    class:
+      - name: adminnoc
+        idle_timeout: 20
+        perms: all
+    user:
+      - name: topnoc
+        uid: 2000
+        class: super-user
+        full_name: "NOC Admin"
+        auth: $1$n3j3ln3l3k3k3j3j3j3
+      - name: tacacs-access 
+        uid: 2001
+        class: adminnoc
+        full_name: "All Tacacs Users"
+snmp:
+  v3:
+    groups:
+      - name: DHS-GROUP-RW
+        read_view: DHS-SNMP-VIEW
+        write_view: DHS-SNMP-VIEW
+        notify_view: DHS-SNMP-VIEW
+      - name: DHS-GROUP-RO
+        read_view: DHS-SNMP-VIEW
+        notify_view: DHS-SNMP-VIEW
+      - name: E2E-GROUP-RO
+        read_view: E2E-SNMP-VIEW
+      - name: E2E-GROUP-RO-TRAP
+        read_view: E2E-SNMP-VIEW
+        notify_view: E2E-SNMP-VIEW
+    users:
+      - name: DHS-USER-RW
+        group: DHS-GROUP-RW
+        auth:
+          type: sha
+          password: DHSRWSHA
+        privacy:
+          type: aes128
+          password: DHSRWAES
+      - name: DHS-USER-RO
+        group: DHS-GROUP-RO
+        auth:
+          type: sha
+          password: DHSROSHA
+        privacy:
+          type: aes128
+          password: DHSROAES
+      - name: E2E-USER-RO
+        group: E2E-GROUP-RO
+        auth:
+          type: sha
+          password: E2EROSHA
+        privacy:
+          type: aes128
+          password: E2EROAES
+      - name: E2E-USER-RO-TRAP
+        group: E2E-GROUP-RO-TRAP
+        auth:
+          type: sha
+          password: E2EROTSHA
+        privacy:
+          type: aes128
+          password: E2EROTAES
+    views:
+      - name: DHS-SNMP-VIEW
+        oids:
+          - name: jnxBoxAnatomy
+            param: include
+          - name: snmpMIBObjects
+            param: include
+          - name: system
+            param: include
+          - name: iso
+      - name: E2E-SNMP-VIEW
+        oids:
+          - name: jnxBoxAnatomy
+            param: include
+          - name: snmpMIBObjects
+            param: include
+          - name: system
+            param: include
+          - name: iso
+    notify:
+      - name: CHASSIS-NOTIFICATION-LIST
+        type: trap
+        tag: CHASSIS-TRAP-RECEIVERS
+    trap_recs:
+      - name: svr1.cbp.dhs.gov
+        ip: 10.10.10.1
+        tag: CHASSIS-TRAP-RECEIVERS
+        param: TRAP-PARAMS 
+      - name: svr2.cbp.dhs.gov
+        ip: 10.10.10.2
+        tag: CHASSIS-TRAP-RECEIVERS
+        param: TRAP-PARAMS
+      - name: svr3.cbp.dhs.gov
+        ip: 10.10.10.3
+        tag: CHASSIS-TRAP-RECEIVERS
+        param: TRAP-PARAMS
+    trap_params:
+      - name: TRAP-PARAMS
+        proc_model: v3
+        sec_model: usm
+        sec_level: privacy
+        sec_name: E2E-USER-RO-TRAP
+        notify_filter: CHASSIS-TRAPS
+    notify_filters:
+      - name: CHASSIS-TRAPS
+        oid:
+          - name: jnxChassisTraps
+            param: include
+          - name: jnxChassisOKTraps
+            param: include
+

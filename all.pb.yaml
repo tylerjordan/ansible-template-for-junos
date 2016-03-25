@@ -7,9 +7,6 @@
 # variations. As we have defined these files all we have to do is include
 # them in this file and they will be executed.
 - include: make_clean.p.yaml
-- include: ex.p.yaml
-- include: mx.p.yaml
-- include: qfabric.p.yaml
-- include: qfx.p.yaml
-- include: srx.p.yaml
+- include: mdf.p.yaml
+- include: idf.p.yaml
 - include: assemble_and_commit.p.yaml
