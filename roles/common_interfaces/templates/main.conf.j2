@@ -1,0 +1,77 @@
+{# This config is common to all Junos device types. For it to be generated the 'common_interfaces' role must be included in the platform specific play file. #}
+
+# *** COMMON_INTERFACES CONFIGURATION ***
+
+{# VLANS #}
+{% if vlans is defined %}
+{% for site_vlan in site_vlans %}
+{% for vlan in vlans %}
+{% if site_vlan.name == vlan %}
+set vlans {{ site_vlan.name }} vlan-id {{ site_vlan.id }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% else %}
+{% for site_vlan in site_vlans %}
+set vlans {{ site_vlan.name }} vlan-id {{ site_vlan.id }}
+{% endfor %}
+{% endif %}
+
+
+{# MANAGEMENT INTERFACE #}
+{% if "EX4300" in model %}
+set interfaces irb unit {{ interface.mgmt.unit }} family inet address {{ interface.mgmt.ip }}/{{ interface.mgmt.mask }}
+{% for site_vlan in site_vlans %}
+{% if site_vlan.id == mgmt_vlan_id %}
+set vlans {{ site_vlan.name }} vlan-id {{ mgmt_vlan_id }} l3-interface irb.{{ mgmt_vlan_id }}
+{% endif %}
+{% endfor %}
+{% else %}
+set interfaces vlan unit {{ interface.mgmt.unit }} family inet address {{ interface.mgmt.ip }}/{{ interface.mgmt.mask }}
+{% for site_vlan in site_vlans %}
+{% if site_vlan.id == mgmt_vlan_id %}
+set vlans {{ site_vlan.name }} vlan-id {{ mgmt_vlan_id }} l3-interface vlan.{{ mgmt_vlan_id }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{# TRUNK INTERFACE #}
+{% if interface.trunks is defined %}
+{% for trunk in interface.trunks %}
+{% if "EX4300" in model %}
+set interfaces {{ trunk.name }} description "To {{ trunk.peer }}"
+set interfaces {{ trunk.name }} unit 0 family ethernet-switching interface-mode trunk
+{% else %}
+set interfaces {{ trunk.name }} description "To {{ trunk.peer }}"
+set interfaces {{ trunk.name }} unit 0 family ethernet-switching port-mode trunk
+{% endif %}
+{% if trunk.type == "uplink" %}
+{% for vlan in vlans %}
+set interfaces {{ trunk.name }} unit 0 family ethernet-switching vlan members {{ vlan }}
+{% endfor %}
+{% else %}
+{% for trk_vlan in trunk.vlans %}
+set interfaces {{ trunk.name }} unit 0 family ethernet-switching vlan memers {{ trk_vlan }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{# ACCESS INTERFACE #}
+{% if interface.access is defined %}
+{% if interface.access.range is defined %}
+{% for myrange in interface.access.range %}
+{% for myport in range(myrange.start_port, myrange.end_port) %}
+{% set intf = 'set interfaces ' + myrange.prefix + '/' + myport|string %}
+{{ intf }} description "Vlan {{ myrange.vlan }}"
+{% if "EX4300" in model %}
+{{ intf }} unit 0 family ethernet-switching interface-mode access
+{% else %}
+{{ intf }} unit 0 family ethernet-switching port-mode access
+{% endif %}
+{{ intf }} unit 0 family ethernet-switching vlan members {{ myrange.vlan }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% endif %}
+

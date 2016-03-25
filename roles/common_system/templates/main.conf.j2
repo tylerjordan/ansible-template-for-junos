@@ -1,0 +1,38 @@
+{# This config is common to all Junos device types. For it to be generated the 'common_system' role must be included in the platform specific play file. #}
+# *** COMMON_SYSTEM CONFIGURATION ***
+
+{# DATE AND TIME ZONE #}
+{% for server in system.ntp %}
+set date ntp {{ server }}
+{% endfor %}
+set system time-zone {{ system.time_zone }}
+
+{# AUTHENTICATION ORDER #}
+{% for auth in system.auth_order %}
+set system authentication-order {{ auth }}
+{% endfor %}
+
+{# LOGIN CLASSES #}
+{% for log_class in system.login.class %}
+set system login class {{ log_class.name }} idle-timeout {{ log_class.idle_timeout }}
+set system login class {{ log_class.name }} permissions {{ log_class.perms }}
+{% endfor %}
+
+{# LOCAL USER ACCOUNTS #}
+{% for log_user in system.login.user %}
+set system login user {{ log_user.name }} uid {{ log_user.uid }}
+set system login user {{ log_user.name }} class {{ log_user.class }}
+set system login user {{ log_user.name }} full-name "{{ log_user.full_name }}"
+{% if log_user.auth is defined %}
+set system login user {{ log_user.name }} authentication encrypted-password "{{ log_user.auth }}"
+{% endif %}
+{% endfor %}
+
+{# DHS REQUIRED BANNER TEXT #}
+set system login message "You are accessing a U.S. Government information system, which includes: \n  (1) this computer,\n  (2) this computer network,\n  (3) all computers connected to this network, and\n  (4) all devices and storage media attached to this network or to a computer on this network\n\n  This information system is provided for U.S. Government-authorized use only.\n\n. Unauthorized or improper use or access of this system may result in\ndisciplinary action, as well as civil and criminal penalties.\n\n. By using this information system, you understand and consent to the following:\n\n   o   You have no reasonable expectation of privacy when you use this\ninformation system; this includes any communications or data\ntransiting or stored on this information system.  At any time,\nand for any lawful government purpose, the government may,\nwithout notice, monitor, intercept, search and seize any\ncommunication or data transiting or stored on this information\nsystem.\n\n   o   The government may disclose or use any communications or data\ntransiting or stored on this information system for any lawful\ngovernment purpose, including but not limited to law enforcement\npurposes.\n\n   o   You are NOT authorized to process classified information on this\ninformation system.\n\n   o   Revision {{ revision }}\n\n\n"
+
+{# CBP Announcement Text #}
+set system login announcement "\n \n {{ host }} - {{ location.city }}, {{ location.state }} \n \n THIS IS A U.S. CUSTOMS AND BORDER PROTECTION (CBP) COMPUTER NETWORK SYSTEM\n PROVIDED FOR THE PROCESSING AND STORING UNCLASSIFIED OFFICIAL U.S. GOVERNMENT\n INFORMATION ONLY. DO NOT PROCESS OR STORE CLASSIFIED INFORMATION ON THIS SYSTEM.\n ALL DATA CONTAINED ON OR PROCESSED THROUGH CBP COMPUTER NETWORK SYSTEMS AND\n CBP PERIPHERAL COMPUTING EQUIPMENT AND SOFTWARE IS OWNED OR CONTROLLED BY CBP, AND MAY BE\n MONITORED, INTERCEPTED, RECORDED, READ, COPIED, OR CAPTURED BY CBP AUTHORIZED SYSTEMS\n PERSONNEL IN ANY MANNER. USERS HAVE NO RIGHT OF PRIVACY IN ANY INFORMATION CONTAINED IN OR\n PROCESSED THROUGH THIS SYSTEM. SYSTEMS PERSONNEL MAY PROVIDE GOVERNMENT OFFICIALS, INCLUDING\n LAW ENFORCEMENT REPRESENTATIVES, ANY INFORMATION FOUND ON CBP SYSTEMS, INCLUDING\n POTENTIAL EVIDENCE OF CRIME. USE OF THIS SYSTEM CONSTITUTES CONSENT TO THE ABOVE.\n IF YOU DO NOT CONSENT, DO NOT LOG ON.\n \n"
+
+{# DISABLE OUT-OF-BAND ETHERNET MANAGEMENT PORT #}
+set chassis alarm management-ethernet link-down ignore

@@ -1,0 +1,75 @@
+{# This config is common to all Junos device types. For it to be generated the 'common_snmp' role must be included in the platform specific play file. #}
+# *** COMMON_SNMP CONFIGURATION ***
+# Should only be v3
+
+{# USERS AUTHENTICATION AND PRIVACY METHODS/PASSWORDS #}
+{% for user in snmp.v3.users %}
+{% set prefx = 'set snmp v3 usm local-engine ' + user.name %}
+{{ prefx }} authentication-{{ user.auth.type }} authentication-password {{ user.auth.password }}
+{{ prefx }} privacy-{{ user.privacy.type }} privacy-password {{ user.privacy.password }}
+{% endfor %}
+
+{# VIEW PARAMETERS #}
+{% for myview in snmp.v3.views %}
+{% set prefx = 'set snmp view ' + myview.name + ' oid' %}
+{% for myoid in myview.oids %}
+{% if myoid.param is defined %}
+{{ prefx }} {{ myoid.name }} {{ myoid.param }}
+{% else %}
+{{ prefx }} {{ myoid.name }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+{# USER TO GROUP MAPPINGS #}
+{% for usergroup in snmp.v3.users %}
+set snmp v3 vacm security-to-group security-model usm security-name {{ usergroup.name }} group {{ usergroup.group }}
+{% endfor %}
+
+{# GROUP VIEWS #}
+{% for group in snmp.v3.groups %}
+{% set prefx = 'set snmp v3 vacm access group ' + group.name + ' default-context-prefix security-model usm security-level privacy' %}
+{% if group.read_view is defined %}
+{{ prefx }} read-view {{ group.read_view }}
+{% endif %}
+{% if group.write_view is defined %}
+{{ prefx }} write-view {{ group.write_view }}
+{% endif %}
+{% if group.notify_view is defined %}
+{{ prefx }} notify-view {{ group.notify_view }}
+{% endif %}
+{% endfor %}
+
+{# DEFINE TRAP PARAMETERS #}
+{% for params in snmp.v3.trap_params %}
+{% set prefx = 'set snmp v3 target-parameters ' + params.name %}
+{{ prefx }} parameters message-processing-model {{ params.proc_model }}
+{{ prefx }} parameters security-model {{ params.sec_model }}
+{{ prefx }} parameters security-level {{ params.sec_level }}
+{{ prefx }} parameters security-name {{ params.sec_name }}
+{{ prefx }} notify-filter {{ params.notify_filter }}
+{% endfor %}
+
+{# DEFINE TRAP SERVERS #}
+{% for recvrs in snmp.v3.trap_recs %}
+{% set prefx = 'set snmp v3 target-address ' + recvrs.name %}
+{{ prefx }} address {{ recvrs.ip }}
+{{ prefx }} tag-list {{ recvrs.tag }}
+{{ prefx }} target-paramters {{ recvrs.param }}
+{% endfor %}
+
+{# NOTIFY FILTER #}
+{% for myfilter in snmp.v3.notify_filters %}
+{% set prefx = 'set snmp v3 notify-filter ' + myfilter.name %}
+{% for myoid in myfilter.oid %}
+{{ prefx }} oid {{ myoid.name }} {{ myoid.param }}
+{% endfor %}
+{% endfor %}
+
+{# NOTIFICATION LIST #}
+{% for listname in snmp.v3.notify %}
+{% set prefx = 'set snmp v3 notify ' + listname.name %}
+{{ prefx }} type {{ listname.type }}
+{{ prefx }} tag {{ listname.tag }}
+{% endfor %}
+

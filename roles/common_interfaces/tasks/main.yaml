@@ -1,0 +1,7 @@
+---
+# by referencing the 'common_interfaces' role in the playform specifc plays this task is executed
+# it causes Ansible to generate the common part of the configuration for a host
+- name: Building common_interfaces configuration
+  template: >
+    src=main.conf.j2
+    dest={{ build_dir }}/common_interfaces.conf.part

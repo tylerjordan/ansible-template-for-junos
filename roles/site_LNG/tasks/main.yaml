@@ -1,0 +1,8 @@
+---
+# This named task uses the Ansible template module to generate the a
+# part of the site_LNG configuration. Once it is done it stores the result
+# in a file
+- name: Building site_LNG configuration
+  template: >
+    src=main.conf.j2
+    dest={{ build_dir }}/site_LNG.conf.part

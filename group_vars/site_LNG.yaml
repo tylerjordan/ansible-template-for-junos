@@ -1,0 +1,28 @@
+location:
+  city: "Long Beach"
+  state: CA
+  code: LNG
+site_ip:
+  prefix: 10.100.0.0
+  mask: 22
+site_vlans:
+  - name: CBP_MGMT
+    id: "{{ mgmt_vlan_id }}"
+    ip: 10.100.0.1
+    mask: 28
+    dhcp: False
+  - name: CBP_USERS
+    id: 100
+    ip: 10.100.1.1
+    mask: 24
+    dhcp: True
+  - name: CBP_VOIP
+    id: 120
+    ip: 10.100.2.1
+    mask: 24
+    dhcp: True
+  - name: CBP_SERVERS
+    id: 130
+    ip: 10.100.3.1
+    mask: 24
+    dhcp: False
