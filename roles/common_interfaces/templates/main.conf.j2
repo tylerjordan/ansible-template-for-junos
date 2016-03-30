@@ -28,7 +28,7 @@ set vlans {{ site_vlan.name }} vlan-id {{ site_vlan.id }}
 {% endif %}
 {% endif %}
 {% endfor %}
-set chassis aggregated-devices ethernet device-count {{ mylist | max }}
+set chassis aggregated-devices ethernet device-count {{ (mylist | max) + 1 }}
 
 {# TRUNK INTERFACE #}
 {% if interface.trunks is defined %}
