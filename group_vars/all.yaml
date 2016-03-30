@@ -4,7 +4,6 @@ junos_conf: /var/tmp/build/{{ inventory_hostname }}/junos.conf
 # DON't USE dashes "-" in variable names
 
 revision: 1.4
-mgmt_vlan_id: "119"
 system:
   ntp:
     - 10.5.248.4
@@ -13,6 +12,12 @@ system:
   auth_order:
     - tacplus
     - password
+  tacacs:
+    servers:
+      - ip: 10.159.19.103
+        secret: $9$n3n3n3n3j2j2j2j2
+      - ip: 10.159.19.102
+        secret: $9$m2m2m2m2p5p5p5p5
   login:
     class:
       - name: adminnoc

@@ -17,41 +17,46 @@ set vlans {{ site_vlan.name }} vlan-id {{ site_vlan.id }}
 {% endfor %}
 {% endif %}
 
-
-{# MANAGEMENT INTERFACE #}
-{% if "EX4300" in model %}
-set interfaces irb unit {{ interface.mgmt.unit }} family inet address {{ interface.mgmt.ip }}/{{ interface.mgmt.mask }}
-{% for site_vlan in site_vlans %}
-{% if site_vlan.id == mgmt_vlan_id %}
-set vlans {{ site_vlan.name }} vlan-id {{ mgmt_vlan_id }} l3-interface irb.{{ mgmt_vlan_id }}
+{# DETERMINE NUMBER OF AGGREGATED INTERFACES #}
+{% set mylist = [0] %}
+{% for intf in interface.trunks %}
+{% if "ae" in intf.name %}
+{% set num = intf.name.split("ae") %}
+{% if num[1]|int > mylist[0]|int %}
+{% if mylist.append(num[1]|int) %}
+{% endif %}
+{% endif %}
 {% endif %}
 {% endfor %}
-{% else %}
-set interfaces vlan unit {{ interface.mgmt.unit }} family inet address {{ interface.mgmt.ip }}/{{ interface.mgmt.mask }}
-{% for site_vlan in site_vlans %}
-{% if site_vlan.id == mgmt_vlan_id %}
-set vlans {{ site_vlan.name }} vlan-id {{ mgmt_vlan_id }} l3-interface vlan.{{ mgmt_vlan_id }}
-{% endif %}
-{% endfor %}
-{% endif %}
+set chassis aggregated-devices ethernet device-count {{ mylist | max }}
 
 {# TRUNK INTERFACE #}
 {% if interface.trunks is defined %}
 {% for trunk in interface.trunks %}
-{% if "EX4300" in model %}
-set interfaces {{ trunk.name }} description "To {{ trunk.peer }}"
-set interfaces {{ trunk.name }} unit 0 family ethernet-switching interface-mode trunk
-{% else %}
-set interfaces {{ trunk.name }} description "To {{ trunk.peer }}"
-set interfaces {{ trunk.name }} unit 0 family ethernet-switching port-mode trunk
+{# OPTIONAL AGG CONFIG #}
+{% if trunk.agg is defined %}
+{% for agg_intf in trunk.agg %}
+{% set prefx = 'set interfaces ' + agg_intf %}
+{{ prefx }} "To {{ trunk.peer }} ({{ trunk.name }})"
+{{ prefx }} ether-options 802.3ad {{ trunk.name }}
+{% endfor %}
 {% endif %}
-{% if trunk.type == "uplink" %}
-{% for vlan in vlans %}
-set interfaces {{ trunk.name }} unit 0 family ethernet-switching vlan members {{ vlan }}
+{# TRUNK MODE CONFIG #}
+{% set prefx = 'set interfaces ' + trunk.name %}
+{{ prefx }} description "To {{ trunk.peer }}"
+{% if "EX4300" in model %}
+{{ prefx }} unit 0 family ethernet-switching interface-mode trunk
+{% else %}
+{{ prefx }} unit 0 family ethernet-switching port-mode trunk
+{% endif %}
+{# TRUNK VLAN CONFIG #}
+{% if trunk.vlans is defined %}
+{% for vlan in trunk.vlans %}
+{{ prefx }} unit 0 family ethernet-switching vlan members {{ vlan }}
 {% endfor %}
 {% else %}
-{% for trk_vlan in trunk.vlans %}
-set interfaces {{ trunk.name }} unit 0 family ethernet-switching vlan memers {{ trk_vlan }}
+{% for vlan in vlans %}
+{{ prefx }} unit 0 family ethernet-switching vlan memers {{ vlan }}
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -74,4 +79,3 @@ set interfaces {{ trunk.name }} unit 0 family ethernet-switching vlan memers {{ 
 {% endfor %}
 {% endif %}
 {% endif %}
-

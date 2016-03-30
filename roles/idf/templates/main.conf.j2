@@ -4,14 +4,27 @@
 
 {# DEFAULT GATEWAY #}
 {% for site_vlan in site_vlans %}
-{% if site_vlan.id == 119 %}
+{% if "mgmt" in site_vlan.type %}
 set routing-options static route 0.0.0.0/0 next-hop {{ site_vlan.ip }}
 {% endif %}
 {% endfor %}
 
 {# TACACS #}
-{% for tac_params in idf.tacacs.servers %}
-{% set prefx = 'set system tacplus-server ' + tac_params.ip %}
-{{ prefx }} secret "{{ tac_params.secret }}"
-{{ prefx }} source-address {{ tac_params.src_addr }}
+{% for tacacs in idf.tacacs.servers %}
+{% set prefx = 'set system tacplus-server ' + tacacs.ip %}
+{{ prefx }} secret "{{ tacacs.secret }}"
+{{ prefx }} source-address {{ tacacs.src_addr }}
+{% endfor %}
+
+{# MANAGEMENT INTERFACE #}
+{% for vlan in site_vlans %}
+{% if "mgmt" in vlan.type %}
+{% if "EX4300" in model %}
+set interfaces irb unit {{ vlan.id }} family inet address {{ interface.vlan_mgmt.ip }}/{{ vlan.mask }}
+set vlans {{ vlan.name }} vlan-id {{ vlan.id }} l3-interface irb.{{ vlan.id }}
+{% else %}
+set interfaces vlan unit {{ vlan.id }} family inet address {{ interface.vlan_mgmt.ip }}/{{ vlan.mask }}
+set vlans {{ vlan.name }} vlan-id {{ vlan.id }} l3-interface vlan.{{ vlan.id }}
+{% endif %}
+{% endif %}
 {% endfor %}

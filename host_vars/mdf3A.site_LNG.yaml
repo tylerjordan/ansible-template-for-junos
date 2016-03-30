@@ -1,36 +1,39 @@
 model: EX4550-32F
 host: SWLNG001A03A
+role: mdf
 interface:
-  loopback:
-    unit: 0
+  loop_mgmt:
     ip: 10.1.1.6
-    mask: 32
-  mgmt:
-    unit: 119
-    ip: 10.1.1.7
-    mask: 28
   uplinks:
     - name: ge-0/0/0
       ip: 10.113.10.4
       mask: 28
+      peer: RLNG00AV001A
     - name: ge-0/0/31
       ip: 10.113.10.33
       mask: 28
+      peer: RLNG00VV001A
   trunks:
-    - name: ge-0/0/1
+    - name: ae1
       type: downlink
       peer: IDF1A
       vlans:
         - CBP_USERS
         - CBP_MGMT
         - CBP_VOIP
-    - name: ge-0/0/2
+      agg:
+        - ge-0/0/1
+        - ge-0/0/4
+    - name: ae2
       type: downlink
       peer: IDF2A
       vlans:
         - CBP_USERS
         - CBP_MGMT
         - CBP_VOIP
+      agg:
+        - ge-0/0/2
+        - ge-0/0/5
     - name: ge-0/0/3
       type: downlink
       peer: IDF3B
@@ -45,11 +48,7 @@ interface:
         start_port: 4
         end_port: 9
         vlan: CBP_SERVERS
-        voip: False
     single:
       - name: ge-0/0/12
         vlan: CBP_USERS
-        voip: False
-ospf:
-  area: 0
-  area_range: 10.100.0.0/16
+        voip: voip

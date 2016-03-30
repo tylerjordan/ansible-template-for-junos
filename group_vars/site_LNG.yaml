@@ -3,26 +3,33 @@ location:
   state: CA
   code: LNG
 site_ip:
-  prefix: 10.100.0.0
+  prefix: 10.1.0.0
   mask: 22
+site_ospf:
+  area: 1
+  md5_key: $9$efefefjejejejejejfe
 site_vlans:
   - name: CBP_MGMT
-    id: "{{ mgmt_vlan_id }}"
-    ip: 10.100.0.1
+    type: mgmt
+    id: 119
+    ip: 10.1.1.7
     mask: 28
     dhcp: False
   - name: CBP_USERS
+    type: access
     id: 100
-    ip: 10.100.1.1
+    ip: 10.1.2.1
     mask: 24
     dhcp: True
   - name: CBP_VOIP
+    type: voip
     id: 120
-    ip: 10.100.2.1
+    ip: 10.1.3.1
     mask: 24
     dhcp: True
   - name: CBP_SERVERS
+    type: access
     id: 130
-    ip: 10.100.3.1
+    ip: 10.1.4.1
     mask: 24
     dhcp: False

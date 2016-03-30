@@ -2,33 +2,59 @@
 # *** MDF CONFIGUATION ***
 
 {# TACACS #}
-{% for tac_params in mdf.tacacs.servers %}
-{% set prefx = 'set system tacplus-server ' +  tac_params.ip %}
-{{ prefx }} secret "{{ tac_params.secret }}"
-{{ prefx }} source-address {{ tac_params.src_addr }}
+{% for tacacs in system.tacacs.servers %}
+{% set prefx = 'set system tacplus-server ' +  tacacs.ip %}
+{{ prefx }} secret "{{ tacacs.secret }}"
+{{ prefx }} source-address {{ interface.loop_mgmt.ip }}
 {% endfor %}
 
 {# HELPER FOR DNS #}
 set forwarding-options helpers domain server {{ helpers.domain_server }}
 
 {# HELPERS FOR DHCP #}
-{% for mygroup in helpers.dhcp.server_group %}
-{% set prefx = 'set forwarding-options dhcp-relay server-group ' + mygroup.name %}
-{% for myserver in mygroup.servers %} 
-{{ prefx }} {{ myserver }}
-{% endfor %}
-{% if mygroup.active %}
-set forwarding-options dhcp-relay active-server-group {{ mygroup.name }}
-{% endif %}
-{% endfor %}
-{% for sitevlan in site_vlans %}
-{% set prefx = 'set forwarding-options dhcp-relay group Server_Group interface' %}
-{% if sitevlan.dhcp %}
+{# EX4300 (ELS) #}
 {% if "EX4300" in model %}
-{{ prefx }} irb.{{ sitevlan.id }}
-{% else %}
-{{ prefx }} vlan.{{ sitevlan.id }}
+{% set prefx = 'set forwarding-options dhcp-relay' %}
+{% for server in helpers.dhcp.servers %}
+{{ prefx }} server-group {{ helpers.dhcp.name }} {{ server }}
+{% endfor %}
+{{ prefx }} active-server-group {{ helpers.dhcp.name }}
+{% for site_vlan in site_vlans %}
+{% if site_vlan.dhcp %}
+{{ prefx }} group {{ helpers.dhcp.name }} interface irb.{{ site_vlan.id }}
 {% endif %}
+{% endfor %}
+{# EX4200/EX4550/EX6210 (non-ELS) #}
+{% else %}
+{% set prefx = 'set forwarding-options helpers bootp' %}
+{% for server in helpers.dhcp.servers %}
+{{ prefx }} server {{ server }}
+{% endfor %}
+{% for site_vlan in site_vlans %}
+{% if site_vlan.dhcp %}
+{{ prefx }} interface vlan.{{ site_vlan.id }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{# LOOPBACK FOR REMOTE MANAGEMENT #}
+{% for mgmt in site_vlans %}
+{% if "mgmt" in mgmt.type %}
+{% set prefx = 'set interfaces lo0 unit ' + mgmt.id|string %}
+{{ prefx }} description "Remote Management Interface"
+{{ prefx }} family inet address {{ interface.loop_mgmt.ip }}/{{ mgmt.mask }}
 {% endif %}
 {% endfor %}
 
+{# MANAGEMENT VLAN INTERFACE #}
+{% for mgmt in site_vlans %}
+{% if "mgmt" in mgmt.type %}
+{% if "EX4300" in model %}
+set interfaces irb unit {{ mgmt.id }} family inet address {{ mgmt.ip }}/{{ mgmt.mask }}
+set vlans {{ mgmt.name }} vlan-id {{ mgmt.id }} l3-interface irb.{{ mgmt.id }}
+{% else %}
+set interfaces vlan unit {{ mgmt.id }} family inet address {{ mgmt.ip }}/{{ mgmt.mask }}
+set vlans {{ mgmt.name }} vlan-id {{ mgmt.id }} l3-interface vlan.{{ mgmt.id }}
+{% endif %}
+{% endif %}
+{% endfor %}

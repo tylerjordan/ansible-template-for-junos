@@ -3,16 +3,14 @@ mdf:
     servers:
       - ip: 10.159.19.103
         secret: $9$5F39p0334j43j3j43j4
-        src_addr: "{{ interface.loopback.ip }}"
+        src_addr: "{{ interface.loop_mgmt.ip }}"
       - ip: 10.159.19.102
         secret: $9$a3j3jl5l6hj7l7l8l8l
-        src_addr: "{{ interface.loopback.ip }}"
+        src_addr: "{{ interface.loop_mgmt.ip }}"
 helpers:
   domain_server: 10.159.53.15
   dhcp:
-    server_group:
-      - name: DHCP_Servers
-        active: True
-        servers:
-          - 10.159.53.20
-          - 10.159.53.32
+    name: DHCP_Servers
+    servers:
+      - 10.159.53.20
+      - 10.159.53.32
