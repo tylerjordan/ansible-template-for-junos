@@ -33,7 +33,7 @@ interface:
     single:
       - name: ge-0/0/46
         vlan: CBP_USERS
-        poe: on
+        poe: default
 vlans:
   - CBP_USERS
   - CBP_MGMT

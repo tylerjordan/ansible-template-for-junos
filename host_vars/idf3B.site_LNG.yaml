@@ -1,10 +1,8 @@
 model: EX4300-48T
 host: SWLNG001A03B
 interface:
-  mgmt:
-    unit: 119
+  vlan_mgmt:
     ip: 10.1.1.14
-    mask: 28
   trunks:
     - name: ge-0/0/0
       type: uplink
@@ -16,17 +14,15 @@ interface:
         start_port: 1
         end_port: 30
         vlan: CBP_USERS
-        voip: False 
       - name: range2
         prefix: ge-0/0
         start_port: 31
         end_port: 45
         vlan: CBP_USERS
-        voip: True
+        poe: default
     single:
       - name: ge-0/0/46
         vlan: CBP_USERS
-        voip: False
 vlans:
   - CBP_USERS
   - CBP_MGMT

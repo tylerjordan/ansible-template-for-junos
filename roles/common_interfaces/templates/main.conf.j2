@@ -66,16 +66,85 @@ set chassis aggregated-devices ethernet device-count {{ (mylist | max) + 1 }}
 {% if interface.access is defined %}
 {% if interface.access.range is defined %}
 {% for myrange in interface.access.range %}
-{% for myport in range(myrange.start_port, myrange.end_port) %}
-{% set intf = 'set interfaces ' + myrange.prefix + '/' + myport|string %}
+{% for myport in range(myrange.start_port, (myrange.end_port + 1)) %}
+{% set intf = myrange.prefix + '/' + myport|string %}
+{% set prefx = 'set interfaces ' + intf %}
 {{ intf }} description "Vlan {{ myrange.vlan }}"
 {% if "EX4300" in model %}
-{{ intf }} unit 0 family ethernet-switching interface-mode access
+{{ prefx }} unit 0 family ethernet-switching interface-mode access
 {% else %}
-{{ intf }} unit 0 family ethernet-switching port-mode access
+{{ prefx }} unit 0 family ethernet-switching port-mode access
 {% endif %}
-{{ intf }} unit 0 family ethernet-switching vlan members {{ myrange.vlan }}
+{{ prefx }} unit 0 family ethernet-switching vlan members {{ myrange.vlan }}
+{######################}
+{# VOIP CONFIGURATION #}
+{######################}
+{% if myrange.poe is defined %}
+set poe interface {{ intf }}
+{% if "voip" in myrange.poe %}
+{#######################}
+{# DETERMINE VOIP VLAN #}
+{#######################}
+{% set voipVlan = [] %}
+{% for vlan in site_vlans %}
+{% if "voip" in vlan.type %}
+{% if voipVlan.append(vlan.name) %}
+{% endif %}
+{% endif %}
 {% endfor %}
+{###########################}
+{# ADD MODEL SPECIFIC CODE #}
+{###########################}
+{% if "EX4300" in model %}
+set switch-options voip interface {{ intf }} vlan {{ voipVlan[0] }}
+{% else %}
+set ethernet-switching-options voip interface {{ intf }} vlan {{ voipVlan[0] }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{#############################}
+{# SINGLE PORT CONFIGURATION #}
+{#############################}
+{% if interface.access.single is defined %}
+{% for mysingle in interface.access.single %}
+{% set intf = mysingle.name %}
+{% set prefx = 'set interfaces ' + intf %}
+{{ intf }} description "Vlan {{ mysingle.vlan }}"
+{% if "EX4300" in model %}
+{{ prefx }} unit 0 family ethernet-switching interface-mode access
+{% else %}
+{{ prefx }} unit 0 family ethernet-switching port-mode access
+{% endif %}
+{{ prefx }} unit 0 family ethernet-switching vlan members {{ mysingle.vlan }}
+{######################}
+{# VOIP CONFIGURATION #}
+{######################}
+{% if mysingle.poe is defined %}
+set poe interface {{ intf }}
+{% if "voip" in mysingle.poe %}
+{#######################}
+{# DETERMINE VOIP VLAN #}
+{#######################}
+{% set voipVlan = [] %}
+{% for vlan in site_vlans %}
+{% if "voip" in vlan.type %}
+{% if voipVlan.append(vlan.name) %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{###########################}
+{# ADD MODEL SPECIFIC CODE #}
+{###########################}
+{% if "EX4300" in model %}
+set switch-options voip interface {{ intf }} vlan {{ voipVlan[0] }}
+{% else %}
+set ethernet-switching-options voip interface {{ intf }} vlan {{ voipVlan[0] }}
+{% endif %}
+{% endif %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endif %}
