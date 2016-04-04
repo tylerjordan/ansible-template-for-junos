@@ -19,6 +19,7 @@
   roles:
     - common_system
     - common_interfaces
+    - common_protocols 
     - site_LNG
     - mdf
     - common_snmp 

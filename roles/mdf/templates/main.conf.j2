@@ -58,3 +58,25 @@ set vlans {{ mgmt.name }} vlan-id {{ mgmt.id }} l3-interface vlan.{{ mgmt.id }}
 {% endif %}
 {% endif %}
 {% endfor %}
+
+{# OSPF CONFIGURATION #}
+set protocols ospf area 0.0.0.{{ site_ospf.area|string }} area-range {{ site_ip.prefix }}/{{ site_ip.mask }}
+{% set prefx = "set protocols ospf area 0.0.0." + site_ospf.area|string %}
+{% for uplink in interface.uplinks %}
+{{ prefx }} interface {{ uplink.name }} interface-type p2p
+{{ prefx }} interface {{ uplink.name }} authentication md5 1 key "{{ site_ospf.md5_key }}"
+{% endfor %}
+{% set prefx = 'set protocols ospf area 0.0.0.' + site_ospf.area|string + ' interface' %}
+{% for vlan in site_vlans %}
+{% if "EX4300" in model %}
+{{ prefx }} irb.{{ vlan.id|string }} passive
+{% else %}
+{{ prefx }} vlan.{{ vlan.id|string }} passive
+{% endif %}
+{% endfor %}
+{% for mgmt_vlan in site_vlans %}
+{% if "mgmt" in mgmt_vlan.type %}
+{{ prefx }} lo0.{{ mgmt_vlan.id }} passive
+{% endif %}
+{% endfor %}
+
