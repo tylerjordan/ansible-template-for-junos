@@ -55,6 +55,7 @@ set snmp v3 vacm security-to-group security-model usm security-name {{ usergroup
 {% set prefx = 'set snmp v3 target-address ' + recvrs.name %}
 {{ prefx }} address {{ recvrs.ip }}
 {{ prefx }} tag-list {{ recvrs.tag }}
+{{ prefx }} address-mask {{ recvrs.mask }}
 {{ prefx }} target-paramters {{ recvrs.param }}
 {% endfor %}
 

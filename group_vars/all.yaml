@@ -45,9 +45,6 @@ snmp:
         notify_view: DHS-SNMP-VIEW
       - name: E2E-GROUP-RO
         read_view: E2E-SNMP-VIEW
-      - name: E2E-GROUP-RO-TRAP
-        read_view: E2E-SNMP-VIEW
-        notify_view: E2E-SNMP-VIEW
     users:
       - name: DHS-USER-RW
         group: DHS-GROUP-RW
@@ -73,14 +70,6 @@ snmp:
         privacy:
           type: aes128
           password: E2EROAES
-      - name: E2E-USER-RO-TRAP
-        group: E2E-GROUP-RO-TRAP
-        auth:
-          type: sha
-          password: E2EROTSHA
-        privacy:
-          type: aes128
-          password: E2EROTAES
     views:
       - name: DHS-SNMP-VIEW
         oids:
@@ -105,16 +94,19 @@ snmp:
         type: trap
         tag: CHASSIS-TRAP-RECEIVERS
     trap_recs:
-      - name: svr1.cbp.dhs.gov
-        ip: 10.10.10.1
+      - name: E2E1
+        ip: 10.10.208.0
+        mask: 255.255.255.128
         tag: CHASSIS-TRAP-RECEIVERS
         param: TRAP-PARAMS 
-      - name: svr2.cbp.dhs.gov
-        ip: 10.10.10.2
+      - name: E2E2
+        ip: 10.10.97.0
+        mask: 255.255.255.128
         tag: CHASSIS-TRAP-RECEIVERS
         param: TRAP-PARAMS
-      - name: svr3.cbp.dhs.gov
-        ip: 10.10.10.3
+      - name: ESMarts
+        ip: 10.10.105.0
+        mask: 255.255.255.0
         tag: CHASSIS-TRAP-RECEIVERS
         param: TRAP-PARAMS
     trap_params:
@@ -122,7 +114,7 @@ snmp:
         proc_model: v3
         sec_model: usm
         sec_level: privacy
-        sec_name: E2E-USER-RO-TRAP
+        sec_name: E2E-USER-RO
         notify_filter: CHASSIS-TRAPS
     notify_filters:
       - name: CHASSIS-TRAPS

@@ -1,7 +1,14 @@
 {# This config is common to all Junos device types. For it to be generated the 'common_protocols' role must be included in the platform specific play file. #}
 # *** COMMON_PROTOCOLS CONFIGURATION ***
 
-{# RSTP CONFIGURATION #}
+{# RSTP TRUNK CONFIGURATION #}
+{% if interface.trunks is defined %}
+{% for trunk in interface.trunks %}
+set protocols rstp interface {{ trunk.name }} mode point-to-point
+{% endfor %}
+{% endif %}
+
+{# RSTP ACCESS CONFIGURATION #}
 {% if interface.access is defined %}
 {% if interface.access.range is defined %}
 {% for myrange in interface.access.range %}
