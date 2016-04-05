@@ -17,9 +17,8 @@
 # reused in all the playbooks. Roles contain the tasks for generating the
 # configuration. By default Ansible will look in roles/<role name>/tasks/main.yaml to find what tasks it need to perform
   roles:
-    - common_system
     - common_interfaces
     - common_protocols
-    - site_LNG 
-    - idf
     - common_snmp 
+    - common_system 
+    - idf 
