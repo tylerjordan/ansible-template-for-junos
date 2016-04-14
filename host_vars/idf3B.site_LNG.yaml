@@ -1,5 +1,6 @@
 model: EX4300-48T
 host: SWLNG001A03B
+role: IDF
 interface:
   vlan_mgmt:
     ip: 10.1.1.14

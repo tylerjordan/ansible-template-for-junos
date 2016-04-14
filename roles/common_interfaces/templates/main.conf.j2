@@ -69,7 +69,7 @@ set chassis aggregated-devices ethernet device-count {{ (mylist | max) + 1 }}
 {% for myport in range(myrange.start_port, (myrange.end_port + 1)) %}
 {% set intf = myrange.prefix + '/' + myport|string %}
 {% set prefx = 'set interfaces ' + intf %}
-{{ intf }} description "Vlan {{ myrange.vlan }}"
+{{ prefx }} description "Vlan {{ myrange.vlan }}"
 {% if "EX4300" in model %}
 {{ prefx }} unit 0 family ethernet-switching interface-mode access
 {% else %}
@@ -112,7 +112,7 @@ set ethernet-switching-options voip interface {{ intf }} vlan {{ voipVlan[0] }}
 {% for mysingle in interface.access.single %}
 {% set intf = mysingle.name %}
 {% set prefx = 'set interfaces ' + intf %}
-{{ intf }} description "Vlan {{ mysingle.vlan }}"
+{{ prefx }} description "Vlan {{ mysingle.vlan }}"
 {% if "EX4300" in model %}
 {{ prefx }} unit 0 family ethernet-switching interface-mode access
 {% else %}

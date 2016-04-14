@@ -3,7 +3,6 @@ junos_conf: /var/tmp/build/{{ inventory_hostname }}/junos.conf
 
 # DON't USE dashes "-" in variable names
 
-revision: 1.4
 system:
   ntp:
     - 10.5.248.4

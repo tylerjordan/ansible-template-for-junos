@@ -1,6 +1,6 @@
 model: EX4550-32F
 host: SWLNG001A03A
-role: mdf
+role: MDF
 interface:
   loop_mgmt:
     ip: 10.1.1.6

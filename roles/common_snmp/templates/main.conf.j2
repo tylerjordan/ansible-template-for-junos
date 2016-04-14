@@ -1,6 +1,6 @@
 {# This config is common to all Junos device types. For it to be generated the 'common_snmp' role must be included in the platform specific play file. #}
+
 # *** COMMON_SNMP CONFIGURATION ***
-# Should only be v3
 
 {# USERS AUTHENTICATION AND PRIVACY METHODS/PASSWORDS #}
 {% for user in snmp.v3.users %}
@@ -73,4 +73,3 @@ set snmp v3 vacm security-to-group security-model usm security-name {{ usergroup
 {{ prefx }} type {{ listname.type }}
 {{ prefx }} tag {{ listname.tag }}
 {% endfor %}
-

@@ -1,5 +1,8 @@
 {# This config is common to all Junos device types. For it to be generated the 'common_system' role must be included in the platform specific play file. #}
+
 # *** COMMON_SYSTEM CONFIGURATION ***
+{# HOSTNAME #}
+set system host-name {{ host }}
 
 {# DATE AND TIME ZONE #}
 {% for server in system.ntp %}
